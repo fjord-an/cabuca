@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Uncomment below if you have SSL certificates to mount:
+      # - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - web_app
+
+  web_app:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    expose:
+      - "8080"
+

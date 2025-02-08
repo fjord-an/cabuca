@@ -1,0 +1,10 @@
+# ignore env variable files
+.env
+*.env
+
+# Ignore certbot data
+certbot/
+
+#ignore Docekr build caches
+**/node_modules/
+**/__pycache__/

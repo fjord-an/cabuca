@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Nginx: Reverse proxy and SSL termination
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    environment:
+      - DOMAIN_NAME=cabooltureregionuc.org.au  # Change this as needed
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx/backend.crt:/etc/nginx/backend.crt:ro
+    depends_on:
+      - api
+
+  # Certbot: Obtain and renew Let's Encrypt certificates
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+
+  # Migrations: Handle database migrations
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+      - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - sqlite-data:/Data
+
+  # API: Your ASP.NET Core application
+  api:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - DOCKER_USERNAME=${DOCKER_USERNAME}
+      - DOCKER_PASSWORD=${DOCKER_PASSWORD}
+      - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
+      - SSH_USERNAME=${SSH_USERNAME}
+      - SSH_SERVER_IP=${SSH_SERVER_IP}
+      - SSH_SERVER_PATH=${SSH_SERVER_PATH}
+      - ASPNETCORE_URLS=https://+:8443;http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+    volumes:
+      - sqlite-data:/Data
+      - data-protection-keys:/app/.aspnet/DataProtection-Keys
+      - ./certs:/certs
+    env_file:
+      - .env
+    expose:
+      - "8080"
+      - "8443"
+
+volumes:
+  certbot-etc:
+  certbot-www:
+  sqlite-data:
+  data-protection-keys:
