@@ -4,9 +4,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Check if docker-compose is installed.
-if ! [ -x "$(command -v docker-compose)" ]; then
-  echo 'Error: docker-compose is not installed.' >&2
+# Check if docker compose is installed.
+if ! [ -x "$(command -v docker compose)" ]; then
+  echo 'Error: docker compose is not installed.' >&2
   exit 1
 fi
 
@@ -38,10 +38,10 @@ mkdir -p "$DATA_PATH/www"
 mkdir -p "$DATA_PATH/conf"
 
 echo "### Starting Nginx ..."
-docker-compose up --force-recreate -d nginx
+docker compose up --force-recreate -d nginx
 
 echo "### Requesting Let's Encrypt certificate for domains: ${domains[@]} ..."
-docker-compose run --rm certbot certonly --webroot \
+docker compose run --rm certbot certonly --webroot \
   -w /var/www/certbot \
   $([[ $STAGING != "0" ]] && echo "--staging") \
   $([[ -n $EMAIL ]] && echo "--email $EMAIL" || echo "--register-unsafely-without-email") \
@@ -51,4 +51,4 @@ docker-compose run --rm certbot certonly --webroot \
   --force-renewal
 
 echo "### Reloading Nginx ..."
-docker-compose exec nginx nginx -s reload
+docker compose exec nginx nginx -s reload
