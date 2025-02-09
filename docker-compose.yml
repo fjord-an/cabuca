@@ -15,7 +15,6 @@ services:
       - data-protection-keys:/app/.aspnet/DataProtection-Keys
     env_file:
       - .env
-    command: ["dotnet", "ef", "database", "update"]
 
   # API: Your ASP.NET Core application
   api:
