@@ -2,8 +2,8 @@ FROM nginx:alpine
 ENV DOMAIN_NAME cabooltureregionuc.org.au   # Default value; can be overridden
 
 #get the configuration files
-COPY certbot/conf/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
-COPY certbot/conf/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
+COPY conf/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
+COPY conf/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
 
 # Copy the template into the image
 COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template

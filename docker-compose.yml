@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'  # Note: We'll update this shortly
 
 services:
   # Migrations: Handle database migrations using a prebuilt image
@@ -21,18 +21,19 @@ services:
     image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - JWT_SECRET=${JWT_SECRET}
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=https://+:8443;http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+      - JWT_SECRET=your_jwt_secret
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=securepassword
+      - ADMIN_EMAIL=admin@example.com
     volumes:
       - sqlite-data:/Data
       - data-protection-keys:/app/.aspnet/DataProtection-Keys
-      - ./certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
+      - ./certs:/certs
     expose:
       - "8080"
+      - "8443"
     env_file:
       - .env
     depends_on:
@@ -45,15 +46,15 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DOMAIN_NAME=spacey.my
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
-      - ./nginx/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
       - ./certs:/etc/nginx/certs:ro
+      - ./nginx/backend.crt:/etc/nginx/backend.crt:ro
     depends_on:
       - api
 
