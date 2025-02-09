@@ -1,26 +1,50 @@
 version: '3.8'
 
 services:
-  # API Service
+  # Migrations: Handle database migrations
+  migrations:
+    build:
+      context: ../backend/CabUCA.API
+      dockerfile: Dockerfile.migrations
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
+      - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
+    volumes:
+      - sqlite-data:/Data
+      - ./certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
+      - data-protection-keys:/app/.aspnet/DataProtection-Keys
+    env_file:
+      - .env
+    command: ["dotnet", "ef", "database", "update"]
+
+  # API: Your ASP.NET Core application
   api:
     image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api:latest
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ASPNETCORE_URLS=https://+:8443;http://+:8080
+      - ASPNETCORE_URLS=http://+:8080
+      - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
+      - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
+      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
     volumes:
       - sqlite-data:/Data
       - data-protection-keys:/app/.aspnet/DataProtection-Keys
-    expose:
-      - "8080"
-      - "8443"
+      - ./certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
     env_file:
       - .env
+    expose:
+      - "8080"
 
-  # Nginx Service
+  # Nginx: Reverse proxy and SSL termination
   nginx:
     build:
       context: ./nginx
@@ -33,10 +57,12 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - api
 
-  # Certbot Service
+  # Certbot: Obtain and renew Let's Encrypt certificates
   certbot:
     image: certbot/certbot
     volumes:

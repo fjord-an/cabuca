@@ -2,9 +2,18 @@
 .env
 *.env
 
-# Ignore certbot data
+# Ignore certificates and keys
+certs/
+*.pfx
+*.key
+*.crt
+
+# Ignore Certbot data
 certbot/
 
 #ignore Docekr build caches
 **/node_modules/
 **/__pycache__/
+*.pyc
+.DS_Store
+
