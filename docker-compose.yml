@@ -63,7 +63,7 @@ services:
     command: certonly --webroot --webroot-path=/var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
 
   admin-frontend:
-    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin-frontend:latest
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
     volumes:

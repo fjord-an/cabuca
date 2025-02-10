@@ -30,10 +30,10 @@ mkdir -p "$DATA_PATH/www"
 mkdir -p "$DATA_PATH/conf"
 
 echo "### Starting Nginx and admin-frontend ..."
-docker compose -f docker-compose.prod.yml up --force-recreate -d nginx admin-frontend
+docker compose -f docker-compose.yml up --force-recreate -d nginx admin-frontend
 
 echo "### Requesting Let's Encrypt certificates for domains: ${DOMAIN_NAME}, admin.${DOMAIN_NAME} ..."
-docker compose -f docker-compose.prod.yml run --rm certbot certonly --webroot \
+docker compose -f docker-compose.yml run --rm certbot certonly --webroot \
   -w /var/www/certbot \
   $([[ $STAGING != "0" ]] && echo "--staging") \
   $([[ -n $EMAIL ]] && echo "--email $EMAIL" || echo "--register-unsafely-without-email") \
@@ -43,5 +43,5 @@ docker compose -f docker-compose.prod.yml run --rm certbot certonly --webroot \
   --force-renewal
 
 echo "### Reloading Nginx services ..."
-docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
-docker compose -f docker-compose.prod.yml exec admin-frontend nginx -s reload
+docker compose -f docker-compose.yml exec nginx nginx -s reload
+docker compose -f docker-compose.yml exec admin-frontend nginx -s reload
