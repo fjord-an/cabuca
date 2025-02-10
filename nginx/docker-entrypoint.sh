@@ -2,6 +2,8 @@
 
 set -e
 
+echo "Starting Nginx with domain: ${DOMAIN_NAME}"
+
 # Paths
 SSL_CERT="/etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem"
 SSL_KEY="/etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem"

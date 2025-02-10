@@ -1,12 +1,14 @@
-FROM nginx:alpine
-ENV DOMAIN_NAME cabooltureregionuc.org.au   # Default value; can be overridden
+FROM nginx:latest
 
-#get the configuration files
-COPY conf/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
-COPY conf/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
+# Copy entrypoint script and make it executable
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Copy the template into the image
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+# Copy Nginx configuration templates
+COPY templates/ /etc/nginx/templates/
 
-# Use an entrypoint script to substitute environment variables and start Nginx
-CMD ["sh", "-c", "envsubst '$DOMAIN_NAME' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+# Copy SSL configuration files
+COPY conf/ /etc/nginx/ssl/
+
+# Set the entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
