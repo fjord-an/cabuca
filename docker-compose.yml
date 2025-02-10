@@ -42,7 +42,7 @@ services:
   nginx:
     build:
       context: ./nginx
-      dockerfile: nginx/Dockerfile
+      dockerfile: Dockerfile
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
     ports:
@@ -62,9 +62,27 @@ services:
       - certbot-www:/var/www/certbot
     command: certonly --webroot --webroot-path=/var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
 
+  admin-frontend:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin-frontend:latest
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    expose:
+      - "80:80"
+    depends_on:
+      - api
+      - certbot
+    networks:
+      - backend
+
 volumes:
   certbot-etc:
   certbot-www:
   sqlite-data:
   data-protection-keys:
 
+networks:
+  backend:
+    driver: bridge
