@@ -53,6 +53,8 @@ services:
       - certbot-www:/var/www/certbot
     depends_on:
       - api
+    networks:
+      - backend
 
   # Certbot: Obtain and renew Let's Encrypt certificates
   certbot:
@@ -70,12 +72,12 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
     expose:
-      - "80:80"
+      - "80"
+    networks:
+      - backend
     depends_on:
       - api
       - certbot
-    networks:
-      - backend
 
 volumes:
   certbot-etc:
