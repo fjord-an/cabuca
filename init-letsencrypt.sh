@@ -4,9 +4,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Check if docker-compose is installed.
-if ! [ -x "$(command -v docker-compose)" ]; then
-  echo 'Error: docker-compose is not installed.' >&2
+# Check if docker compose is installed.
+if ! [ -x "$(command -v docker compose)" ]; then
+  echo 'Error: docker compose is not installed.' >&2
   exit 1
 fi
 
@@ -30,12 +30,12 @@ mkdir -p "$DATA_PATH/www"
 mkdir -p "$DATA_PATH/conf"
 
 echo "### Starting Nginx and admin-frontend ..."
-docker-compose -f docker-compose.prod.yml up --force-recreate -d nginx admin-frontend
+docker compose -f docker-compose.yml up --force-recreate -d nginx admin-frontend
 
 # Delete existing certificates for each domain
 for domain in "${DOMAINS[@]}"; do
     echo "### Deleting existing certificates for $domain (if they exist) ..."
-    docker-compose -f docker-compose.prod.yml run --rm certbot sh -c "rm -Rf /etc/letsencrypt/live/$domain /etc/letsencrypt/archive/$domain /etc/letsencrypt/renewal/$domain.conf || true"
+    docker compose -f docker-compose.yml run --rm certbot sh -c 'rm -Rf /etc/letsencrypt/live/'"$domain"' /etc/letsencrypt/archive/'"$domain"' /etc/letsencrypt/renewal/'"$domain"'.conf || true'
 done
 
 # Prepare domain arguments for Certbot
@@ -61,7 +61,7 @@ fi
 echo "### Requesting Let's Encrypt certificate for domains: ${DOMAINS[@]} ..."
 
 # Run Certbot to obtain certificates
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly --webroot \
+docker compose -f docker-compose.yml run --rm certbot certonly --webroot \
     -w /var/www/certbot \
     $STAGING_ARG \
     $EMAIL_ARG \
@@ -71,4 +71,4 @@ docker-compose -f docker-compose.prod.yml run --rm certbot certonly --webroot \
     --force-renewal
 
 echo "### Reloading Nginx ..."
-docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
+docker compose -f docker-compose.yml exec nginx nginx -s reload
