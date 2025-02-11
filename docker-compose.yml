@@ -45,14 +45,19 @@ services:
       dockerfile: Dockerfile
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
+      - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/options-ssl-nginx.conf:/etc/nginx/ssl/options-ssl-nginx.conf:ro
+      - ./nginx/ssl-dhparams.pem:/etc/nginx/ssl/ssl-dhparams.pem:ro
     depends_on:
       - api
+      - admin-frontend
     networks:
       - backend
 
@@ -62,12 +67,12 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
 
+  # Admin Frontend: Your Admin React Application
   admin-frontend:
     image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
