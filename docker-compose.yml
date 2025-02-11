@@ -34,19 +34,35 @@ services:
       - "8443"
     env_file:
       - .env
+    networks:
+      - backend
     depends_on:
       migrations:
         condition: service_completed_successfully
+
+  # Admin Frontend: Your Admin React Application
+  admin-frontend:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
+    environment:
+      - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    expose:
+      - "5000"
+    networks:
+      - backend
+    depends_on:
+      - api
 
   # Nginx: Reverse proxy and SSL termination
   nginx:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-      network: host
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
-      - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
+      - ADMIN_DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
     ports:
       - "80:80"
       - "443:443"
@@ -66,22 +82,8 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
-
-  # Admin Frontend: Your Admin React Application
-  admin-frontend:
-    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
-    environment:
-      - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
-    volumes:
-      - certbot-etc:/etc/letsencrypt
-      - certbot-www:/var/www/certbot
-    expose:
-      - "80"
     networks:
       - backend
-    depends_on:
-      - api
-      - certbot
 
 volumes:
   certbot-etc:

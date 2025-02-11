@@ -54,12 +54,14 @@ fi
 
 # Prepare staging argument
 if [ "$STAGING" != "0" ]; then
+    echo "### Using staging environment ..."
     STAGING_ARG="--staging"
 else
     STAGING_ARG=""
 fi
 
 echo "### Requesting Let's Encrypt certificate for domains: ${DOMAINS[@]} ..."
+
 
 # Run Certbot to obtain certificates
 docker compose -f docker-compose.yml run --rm certbot certonly --webroot \
