@@ -53,8 +53,6 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
       - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/options-ssl-nginx.conf:/etc/nginx/ssl/options-ssl-nginx.conf:ro
-      - ./nginx/ssl-dhparams.pem:/etc/nginx/ssl/ssl-dhparams.pem:ro
     depends_on:
       - api
       - admin-frontend
