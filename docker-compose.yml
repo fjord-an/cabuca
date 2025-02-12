@@ -45,11 +45,15 @@ services:
     image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
     environment:
       - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
+      - REACT_APP_API_DOMAIN_NAME=${REACT_APP_API_DOMAIN_NAME}
+      - REACT_APP_DOMAIN_NAME=${REACT_APP_DOMAIN_NAME}
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
     expose:
       - "5000"
+    env_file:
+      - .env
     networks:
       - backend
     depends_on:
@@ -70,11 +74,11 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
       - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - backend
     depends_on:
       - api
       - admin-frontend
-    networks:
-      - backend
 
   # Certbot: Obtain and renew Let's Encrypt certificates
   certbot:
