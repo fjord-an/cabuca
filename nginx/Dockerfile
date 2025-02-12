@@ -8,7 +8,7 @@ RUN chmod +x /docker-entrypoint.sh
 COPY templates/ /etc/nginx/templates/
 
 # Copy SSL configuration files
-COPY conf/ /etc/nginx/ssl/
+COPY ssl/ /etc/nginx/ssl/
 
 # Set the entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]
