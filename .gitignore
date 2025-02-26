@@ -17,3 +17,7 @@ certbot/
 *.pyc
 .DS_Store
 
+#ignore sqlite backup
+cabuca_sqlite-data/
+sqlite-backup.sh
+

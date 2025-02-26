@@ -1,18 +1,18 @@
 services:
-  # Migrations: Handle database migrations using a prebuilt image
-  migrations:
-    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-migrations:latest
-    environment:
-      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
-      - ASPNETCORE_ENVIRONMENT=Production
-      - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
-      - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
-    volumes:
-      - sqlite-data:/Data
-      - ./certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
-      - data-protection-keys:/app/.aspnet/DataProtection-Keys
-    env_file:
-      - .env
+  # # Migrations: Handle database migrations using a prebuilt image
+  # migrations:
+  #   image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-migrations:latest
+  #   environment:
+  #     - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #     - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
+  #     - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
+  #   volumes:
+  #     - sqlite-data:/Data
+  #     - /certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
+  #     - data-protection-keys:/app/.aspnet/DataProtection-Keys
+  #   env_file:
+  #     - .env
 
   # API: Your ASP.NET Core application
   api:
