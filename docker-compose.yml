@@ -61,9 +61,7 @@ services:
 
   # Nginx: Reverse proxy and SSL termination
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: owasp/modsecurity-nginx:latest
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
       - ADMIN_DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
@@ -74,6 +72,10 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/templates/nginx-https.conf:/etc/nginx/conf.d/nginx.conf
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/modsecurity-custom:/etc/modsecurity.d/custom-rules:ro
+      - nginx-pid:/var/run/nginx
     networks:
       - backend
     depends_on:
@@ -94,7 +96,7 @@ volumes:
   certbot-www:
   sqlite-data:
   data-protection-keys:
-
+  #nginx-pid:
 networks:
   backend:
     driver: bridge
