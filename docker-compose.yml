@@ -28,6 +28,8 @@ services:
     volumes:
       - sqlite-data:/Data
       - data-protection-keys:/app/.aspnet/DataProtection-Keys
+      #for faster rebuilds:
+      - ~/.nuget/packages:/root/.nuget/packages
       - ./certs:/certs
     expose:
       - "8080"
