@@ -17,7 +17,14 @@ certbot/
 *.pyc
 .DS_Store
 
-#ignore sqlite backup
+# ignore sqlite backup volumes
 cabuca_sqlite-data/
-sqlite-backup.sh
 
+# Local backups / editor saves
+*.bak
+*.bak*
+*.save
+**/conf.bak/
+
+# Local-only nested checkouts
+cabuca/

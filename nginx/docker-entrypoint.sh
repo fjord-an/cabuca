@@ -34,4 +34,28 @@ else
   envsubst '${DOMAIN_NAME}' < /etc/nginx/templates/nginx-http.conf > $NGINX_CONF
 fi
 
+# Ensure the PID directory exists and has correct permissions
+# These commands will be ignored if not running as root
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p /var/run/nginx
+  chown -R nginx:nginx /var/run/nginx
+  chmod 755 /var/run/nginx
+  # Also ensure write permissions for the nginx user to the containing directory
+  chmod 755 /var/run
+fi
+
+# Make sure the PID file is correctly set in nginx.conf
+if ! grep -q "pid /var/run/nginx/nginx.pid;" $NGINX_CONF; then
+  echo "Setting correct PID file path in nginx.conf"
+  sed -i 's|pid .*|pid /var/run/nginx/nginx.pid;|' $NGINX_CONF
+  # If no pid directive exists, add it near the top of the file
+  if ! grep -q "pid" $NGINX_CONF; then
+    sed -i '1s/^/pid \/var\/run\/nginx\/nginx.pid;\n/' $NGINX_CONF
+  fi
+fi
+
+# Check permissions as a final verification
+echo "Current permissions for /var/run/nginx:"
+ls -la /var/run/nginx
+
 nginx -g 'daemon off;'

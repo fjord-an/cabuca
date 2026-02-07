@@ -7,8 +7,10 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 USER root
 RUN chmod +x /docker-entrypoint.sh
 
-# Switch back to the default user
-USER nginx
+# Create directory for pid file and set proper permissions
+RUN mkdir -p /var/run/nginx && \
+    chown -R nginx:nginx /var/run/nginx && \
+    chmod 755 /var/run/nginx
 
 # Copy Nginx configuration templates
 COPY templates/ /etc/nginx/templates/
@@ -18,3 +20,6 @@ COPY ssl/ /etc/nginx/ssl/
 
 # Set the entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Switch back to the nginx user
+USER nginx

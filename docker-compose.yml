@@ -1,22 +1,22 @@
 services:
-  # # Migrations: Handle database migrations using a prebuilt image
-  # migrations:
-  #   image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-migrations:latest
-  #   environment:
-  #     - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
-  #     - ASPNETCORE_ENVIRONMENT=Production
-  #     - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
-  #     - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
-  #   volumes:
-  #     - sqlite-data:/Data
-  #     - /certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
-  #     - data-protection-keys:/app/.aspnet/DataProtection-Keys
-  #   env_file:
-  #     - .env
+  # Migrations: Handle database migrations using a prebuilt image
+  migrations:
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-migrations-testing:latest
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/Data/CabUCADb.sqlite
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DATA_PROTECTION_CERT_PATH=/certs/dp_keys.pfx
+      - DATA_PROTECTION_CERT_PASSWORD=${DATA_PROTECTION_CERT_PASSWORD}
+    volumes:
+      - sqlite-data:/Data
+      - ./certs/dp_keys.pfx:/certs/dp_keys.pfx:ro
+      - data-protection-keys:/app/.aspnet/DataProtection-Keys
+    env_file:
+      - .env
 
   # API: Your ASP.NET Core application
   api:
-    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api:latest
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-api-testing:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=https://+:8443;http://+:8080
@@ -42,7 +42,7 @@ services:
 
   # Admin Frontend: Your Admin React Application
   admin-frontend:
-    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin
+    image: 025066273203.dkr.ecr.ap-southeast-2.amazonaws.com/olmate/cabuca-admin-testing:latest
     environment:
       - DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
       - REACT_APP_API_DOMAIN_NAME=${REACT_APP_API_DOMAIN_NAME}
@@ -59,11 +59,9 @@ services:
     depends_on:
       - api
 
-  # Nginx: Reverse proxy and SSL termination
+  # Nginx/modsecurity: Reverse proxy and SSL termination with modsecurity WAF. custom rules from nginx/modsecurity-custom
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: owasp/modsecurity-crs:nginx
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
       - ADMIN_DOMAIN_NAME=${ADMIN_DOMAIN_NAME}
@@ -74,13 +72,27 @@ services:
       - certbot-etc:/etc/letsencrypt
       - certbot-www:/var/www/certbot
       - ./nginx/ssl:/etc/nginx/ssl:ro
+        #- ./nginx/templates:/etc/nginx/templates
+        #- ./nginx/templates/nginx-https.conf:/etc/nginx/nginx.conf
+      - ./nginx/templates/nginx-https.conf:/etc/nginx/templates/nginx.conf.template
+        #- ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+      - ./nginx/modsecurity-custom:/etc/modsecurity.d/custom-rules:ro
+        #- nginx-pid:/var/run/nginx
+        #- ./nginx/logs:/var/log/nginx
+        #    command: >
+        #/bin/sh -c "
+        #echo 'Checking ModSecurity paths...' &&
+        #mkdir -p /etc/modsecurity.d &&
+        #echo 'Creating basic ModSecurity config file...' &&
+        #echo 'SecRuleEngine On' > /etc/modsecurity.d/modsecurity.conf &&
+        #echo 'Include /etc/modsecurity.d/custom-rules/*.conf' >> /etc/modsecurity/modsecurity.conf &&
+        #/docker-entrypoint.sh"
     networks:
       - backend
     depends_on:
       - api
       - admin-frontend
 
-  # Certbot: Obtain and renew Let's Encrypt certificates
   certbot:
     image: certbot/certbot
     volumes:
@@ -90,6 +102,7 @@ services:
       - backend
 
 volumes:
+  #nginx-pid:
   certbot-etc:
   certbot-www:
   sqlite-data:
